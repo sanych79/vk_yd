@@ -4,33 +4,32 @@ import shutil
 from tqdm import tqdm
 import json
 
+
 class VK:
+    def __init__(self, access_token, user_id, version='5.131'):
+        self.token = access_token
+        self.id = user_id
+        self.version = version
+        self.params = {'access_token': self.token, 'v': self.version}
+        self.url = 'https://api.vk.com/method/'
 
-   def __init__(self, access_token, user_id, version='5.131'):
-       self.token = access_token
-       self.id = user_id
-       self.version = version
-       self.params = {'access_token': self.token, 'v': self.version}
-       self.url = 'https://api.vk.com/method/'
+    def users_info(self):
+        """Функция получения информации о пользователе VK"""
+        url = self.url + 'users.get'
+        params = {'user_ids': self.id}
+        response = requests.get(url, params={**self.params, **params})
+        return response.json()
 
-   def users_info(self):
-       """Функция получения информации о пользователе VK""" 
-       url = self.url + 'users.get'
-       params = {'user_ids': self.id}
-       response = requests.get(url, params={**self.params, **params})
-       return response.json()
-    
-    
-
-   def get_photo_vk(self, count_f, alboum = 'wall'):
-        """Функция получения фотограций у пользователя self.id на его стене album_id' = "wall" количесто фото 'count_f' """
+    def get_photo_vk(self, count_f, alboum='wall'):
+        """Функция получения фотограций у пользователя self.id в альбоме album_id' =
+        "wall" количесто фото 'count_f' """
         url = self.url + 'photos.get'
-        params = {'owner_id': -self.id, 'album_id': alboum, 'count': count_f, 'extended':1}
+        params = {'owner_id': -self.id, 'album_id': alboum, 'count': count_f, 'extended': 1}
         response = requests.get(url, params={**self.params, **params}).json()
         return response
 
-class YaUploader:
 
+class YaUploader:
     def __init__(self, token: str):
         self.token = token
 
@@ -45,7 +44,6 @@ class YaUploader:
         h = self.get_headers()
         param = {"path": disk_file_path, "overwrite": True}
         response = requests.get(up_url, headers=h, params=param)
-        #print(response.json())
         return response.json()
 
     def upload(self, file_path_from: str, file_path_to: str):
@@ -53,7 +51,6 @@ class YaUploader:
         href = self._get_upload_link(disk_file_path=file_path_to).get("href", "")
         response = requests.put(href, data=open(file_path_from, 'rb'))
         response.raise_for_status()
-        #print(response)
 
     def md(self, path1):
         """Метод создает папку path1 на яндекс диске"""
@@ -69,9 +66,10 @@ class YaUploader:
         param = {"path": path1, "overwrite": True}
         response = requests.delete(href, headers=h, params=param)
 
+
 if __name__ == "__main__":
 
-    def  get_maxsize_photo(serch_data={}):
+    def get_maxsize_photo(serch_data):
         """Функция поиска максимального размера фото. Выход размер, url, количество лайков"""
         size = 0
         size_type = 0
@@ -89,14 +87,14 @@ if __name__ == "__main__":
 
     def read_token(file_name):
         """Функция чтения токена из файлаfile_name."""
-        with open(file_name,'r', encoding='utf8') as file:
+        with open(file_name, 'r', encoding='utf8') as file:
             for line in file:
-                res =  line.strip()
+                res = line.strip()
         return res
 
     def Serch_req(mane):
         result = 0
-        with open("requiremеnts.txt",'r', encoding='utf8') as file:
+        with open("requiremеnts.txt", 'r', encoding='utf8') as file:
             """Функция поиска параметра mane в файле requiremеnts.txt"""
             res = file.readlines()
             for x in res:
@@ -120,22 +118,22 @@ if __name__ == "__main__":
 
     """ создаем временную папку для фото"""
     path1 = os.getcwd()
-    path2 = path1 +f'\{dir_mane}'
+    path2 = path1 + f'\{dir_mane}'
     access_rights = 0o755
     
     try:
-       os.makedirs(path2)
+        os.makedirs(path2)
     except OSError:
-       print ("Создать директорию %s не удалось" % path2)
+        print("Создать директорию %s не удалось" % path2)
     else:
-       print ("Успешно создана директория %s " % path2)
+        print("Успешно создана директория %s " % path2)
 
     os.chdir(path2)
     main_result = []
 
     Count_step_statusbar = int(100/count_file)
     with tqdm(total=100) as pbar:
-        for x in vk.get_photo_vk(count_f= count_file, alboum=album_i)['response']['items']:
+        for x in vk.get_photo_vk(count_f=count_file, alboum=album_i)['response']['items']:
             like_count = x['likes']['count']
 
             size, max_url, max_like, size_type = get_maxsize_photo(x['sizes'])
@@ -156,9 +154,3 @@ if __name__ == "__main__":
     """ запись результата в файл result.json """
     with open('result.json', 'w') as f:
         json.dump(main_result, f)
-
-
-
-
-     
-
