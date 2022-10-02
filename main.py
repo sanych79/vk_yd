@@ -135,8 +135,9 @@ def read_parametrs():
             count_file = int(Serch_req('count_file'))
             print(f'Присвоенно значение по умолчанию :{count_file}')
 
-def main_function(main_res):
+def main_function():
     """Основная функция которая получает данные из ВК и записывает на ЯДиск"""
+    main_res = []
     Count_step_statusbar = int(100/count_file)
     last_max_like = 0
     with tqdm(total=100) as pbar:
@@ -156,13 +157,12 @@ def main_function(main_res):
 
     """ запись результата в файл result.json """
     with open('result.json', 'w') as f:
-        json.dump(main_result, f)
+        json.dump(main_res, f)
 
 if __name__ == "__main__":
 
     read_parametrs()
     vk = VK(vk_token, user_id)
     uploader = YaUploader(yd_token)
-    main_result = []
-    main_function(main_result)
+    main_function()
     print("Конец работы программы")
