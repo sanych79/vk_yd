@@ -74,7 +74,7 @@ def  get_maxsize_photo(serch_data):
     return size, m_url, m_like, size_type
 
 def read_parametrs():
-    """чтение параметров программы из param.ini"""
+    """чтение параметров программы из settings.ini"""
     global user_id
     global count_file
     global dir_mane
