@@ -11,12 +11,6 @@ class VK:
         self.version = version
         self.params = {'access_token': self.token, 'v': self.version}
         self.url = 'https://api.vk.com/method/'
-    def users_info(self):
-        """Функция получения информации о пользователе VK"""
-        url = self.url + 'users.get'
-        params = {'user_ids': self.id}
-        response = requests.get(url, params={**self.params, **params})
-        return response.json()
 
     def get_photo_vk(self, count_f, alboum = 'wall'):
         """Функция получения фотограций у пользователя self.id на его стене album_id' = "wall" количесто фото 'count_f' """
@@ -43,12 +37,10 @@ class YaUploader:
         return response.json()
 
     def upload(self, file_path_from: str, file_path_to: str):
-        """Метод загружает файлы по списку file_path на яндекс диск"""
+        """Метод загружает файлы c file_path_from в file_path_to на ЯДиск"""
         href = self._get_upload_link(disk_file_path=file_path_to).get("href", "")
-        #response = requests.put(href, data=open(file_path_from, 'rb'))
         response = requests.put(href, data=file_path_from)
         response.raise_for_status()
-        #print(response)
 
     def md(self, path1):
         """Метод создает папку path1 на яндекс диске"""
@@ -58,7 +50,7 @@ class YaUploader:
         response = requests.put(href, headers=h, params=param)
 
 def  get_maxsize_photo(serch_data):
-    """Функция поиска максимального размера фото. Выход размер, url, количество лайков"""
+    """Функция поиска максимального размера фото. Выход размер, url, количество лайков, тип размера фото"""
     size = 0
     size_type = 0
     m_url = 0
