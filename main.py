@@ -1,6 +1,7 @@
 import requests
 from tqdm import tqdm
 import json
+import configparser
 
 
 class VK:
@@ -55,13 +56,6 @@ class YaUploader:
         h = self.get_headers()
         param = {"path": path1, "overwrite": True}
         response = requests.put(href, headers=h, params=param)
-    
-    def dd(self, path1):
-        """Метод создает удаляет папку path1 на яндекс диске"""
-        href = 'https://cloud-api.yandex.net/v1/disk/resources'
-        h = self.get_headers()
-        param = {"path": path1, "overwrite": True}
-        response = requests.delete(href, headers=h, params=param)
 
 def  get_maxsize_photo(serch_data):
     """Функция поиска максимального размера фото. Выход размер, url, количество лайков"""
@@ -79,24 +73,6 @@ def  get_maxsize_photo(serch_data):
         count = 0
     return size, m_url, m_like, size_type
 
-def read_token(file_name):
-    """Функция чтения токена из файла file_name."""
-    with open(file_name,'r', encoding='utf8') as file:
-        for line in file:
-            res =  line.strip()
-    return res
-
-def Serch_req(mane):
-    result = 0
-    with open("param.ini",'r', encoding='utf8') as file:
-        """Функция поиска параметра mane в файле param.ini"""
-        res = file.readlines()
-        for x in res:
-            str = x.strip()
-            if str.find(mane) == 0:
-                result = str[len(mane)+1:]
-    return result
-
 def read_parametrs():
     """чтение параметров программы из param.ini"""
     global user_id
@@ -105,34 +81,37 @@ def read_parametrs():
     global album_i
     global vk_token
     global yd_token
-    dir_mane = str(Serch_req('dir_mane'))
-    dir_mane = str(Serch_req('dir_mane'))
-    album_i = str(Serch_req('album_id'))
-    vk_token = str(Serch_req('vk_token'))
-    yd_token = str(Serch_req('yd_token'))
+
+    config = configparser.ConfigParser()
+    config.read("settings.ini")
+
+    dir_mane = config["VKtoYD"]["dir_mane"]
+    album_i = config["VKtoYD"]["album_id"]
+    vk_token = config["VKtoYD"]["vk_token"]
+    yd_token = config["VKtoYD"]["yd_token"]
 
     try:
         user_id = int(input('Введи ID пользователя>'))
     except ValueError:
         print('Введено не корректное значения')
-        user_id = int(Serch_req('user_id'))
+        user_id = config["VKtoYD"]["user_id"]
         print(f'Присвоенно значение по умолчанию :{user_id}')
     else:
         if user_id < 1:
             print('Введено не корректное значения')
-            user_id = int(Serch_req('user_id'))
+            user_id = config["VKtoYD"]["user_id"]
             print(f'Присвоенно значение по умолчанию :{user_id}')
 
     try:
         count_file = int(input('Введите количество выгружаемых файлов>'))
     except ValueError:
         print('Введено не корректное значения')
-        count_file = int(Serch_req('count_file'))
+        count_file = config["VKtoYD"]["count_file"]
         print(f'Присвоенно значение по умолчанию :{count_file}')
     else:
         if count_file < 1:
             print('Введено не корректное значения')
-            count_file = int(Serch_req('count_file'))
+            count_file = config["VKtoYD"]["count_file"]
             print(f'Присвоенно значение по умолчанию :{count_file}')
 
 def main_function():
