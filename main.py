@@ -13,9 +13,15 @@ class VK:
         self.url = 'https://api.vk.com/method/'
 
     def get_photo_vk(self, count_f, alboum = 'wall'):
-        """Функция получения фотограций у пользователя self.id на его стене album_id' = "wall" количесто фото 'count_f' """
+        """Функция получения фотограций у пользователя self.id в альбоме album_id' = "wall" количесто фото'count_f' """
         url = self.url + 'photos.get'
         params = {'owner_id': -self.id, 'album_id': alboum, 'count': count_f, 'extended':1}
+        response = requests.get(url, params={**self.params, **params}).json()
+        return response
+    def serch_user_vk(self, user_name):
+        """Функция поиска пользователя """
+        url = self.url + 'users.search'
+        params = {'q': user_name}
         response = requests.get(url, params={**self.params, **params}).json()
         return response
 
@@ -67,7 +73,6 @@ def  get_maxsize_photo(serch_data):
 
 def read_parametrs():
     """чтение параметров программы из settings.ini"""
-    global user_id
     global count_file
     global dir_mane
     global album_i
@@ -81,6 +86,14 @@ def read_parametrs():
     album_i = config["VKtoYD"]["album_id"]
     vk_token = config["VKtoYD"]["vk_token"]
     yd_token = config["VKtoYD"]["yd_token"]
+    count_file = int(config["VKtoYD"]["count_file"])
+
+def enter_param():
+    global user_id
+    global user_name
+
+    config = configparser.ConfigParser()
+    config.read("settings.ini")
 
     try:
         user_id = int(input('Введи ID пользователя>'))
@@ -95,16 +108,17 @@ def read_parametrs():
             print(f'Присвоенно значение по умолчанию :{user_id}')
 
     try:
-        count_file = int(input('Введите количество выгружаемых файлов>'))
+        user_name = str(input('Введи Имя и Фамилию пользователя>'))
     except ValueError:
         print('Введено не корректное значения')
-        count_file = config["VKtoYD"]["count_file"]
-        print(f'Присвоенно значение по умолчанию :{count_file}')
+        user_id = config["VKtoYD"]["user_name"]
+        print(f'Присвоенно значение по умолчанию :{user_name}')
     else:
-        if count_file < 1:
+        if len(user_name) < 4:
             print('Введено не корректное значения')
-            count_file = config["VKtoYD"]["count_file"]
-            print(f'Присвоенно значение по умолчанию :{count_file}')
+            user_id = config["VKtoYD"]["user_name"]
+            print(f'Присвоенно значение по умолчанию :{user_name}')
+
 
 def main_function():
     """Основная функция которая получает данные из ВК и записывает на ЯДиск"""
@@ -130,10 +144,28 @@ def main_function():
     with open('result.json', 'w') as f:
         json.dump(main_res, f)
 
+def comp_username_user_id(username, user_id):
+    """Проверка совпадения имени пользователя и его идентификатора"""
+    for x in vk.serch_user_vk(username)['response']['items']:
+        if x['id']==user_id:
+            return True
+
 if __name__ == "__main__":
 
     read_parametrs()
+    enter_param()
+    vk = VK(vk_token, user_id)
+
+    flag = 0
+    while flag == 0:
+        if comp_username_user_id(user_name, user_id) == True:
+            flag = 1
+        else:
+            print(f'Идентификатор {user_id} не пренадлежит пользователю {user_name}')
+            enter_param()
+
     vk = VK(vk_token, user_id)
     uploader = YaUploader(yd_token)
     main_function()
+
     print("Конец работы программы")
